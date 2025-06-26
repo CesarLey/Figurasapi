@@ -1,0 +1,6 @@
+@FigurasApi_HostAddress = http://localhost:5244
+
+GET {{FigurasApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
