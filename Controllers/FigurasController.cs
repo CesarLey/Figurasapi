@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FigurasApi.Data;
 using FigurasApi.Models;
+using FigurasApi.Services;
 
 namespace FigurasApi.Controllers
 {
@@ -10,28 +11,29 @@ namespace FigurasApi.Controllers
     [ApiController]
     public class FigurasController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IFiguraService _figuraService;
 
-        public FigurasController(ApplicationDbContext context)
+        public FigurasController(IFiguraService figuraService)
         {
-            _context = context;
+            _figuraService = figuraService;
         }
 
         // GET: api/figuras
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Figura>>> GetFiguras()
         {
-            return await _context.Figuras.ToListAsync();
+            var figuras = await _figuraService.GetAllAsync();
+            return Ok(figuras);
         }
 
         // GET: api/figuras/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Figura>> GetFigura(int id)
         {
-            var figura = await _context.Figuras.FindAsync(id);
+            var figura = await _figuraService.GetByIdAsync(id);
             if (figura == null)
                 return NotFound();
-            return figura;
+            return Ok(figura);
         }
 
         // POST: api/figuras
@@ -39,10 +41,8 @@ namespace FigurasApi.Controllers
         [Authorize]
         public async Task<ActionResult<Figura>> PostFigura(Figura figura)
         {
-            figura.CalcularVolumen();
-            _context.Figuras.Add(figura);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetFigura), new { id = figura.Id }, figura);
+            var nuevaFigura = await _figuraService.AddAsync(figura);
+            return CreatedAtAction(nameof(GetFigura), new { id = nuevaFigura.Id }, nuevaFigura);
         }
 
         // PUT: api/figuras/5
@@ -53,18 +53,9 @@ namespace FigurasApi.Controllers
             if (id != figura.Id)
                 return BadRequest();
 
-            var figuraExistente = await _context.Figuras.FindAsync(id);
-            if (figuraExistente == null)
+            var actualizada = await _figuraService.UpdateAsync(figura);
+            if (actualizada == null)
                 return NotFound();
-
-            figuraExistente.TipoFigura = figura.TipoFigura;
-            figuraExistente.Arista = figura.Arista;
-            figuraExistente.Radio = figura.Radio;
-            figuraExistente.Altura = figura.Altura;
-            figuraExistente.Base = figura.Base;
-            figuraExistente.CalcularVolumen();
-
-            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -73,11 +64,9 @@ namespace FigurasApi.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteFigura(int id)
         {
-            var figura = await _context.Figuras.FindAsync(id);
-            if (figura == null)
+            var eliminado = await _figuraService.DeleteAsync(id);
+            if (!eliminado)
                 return NotFound();
-            _context.Figuras.Remove(figura);
-            await _context.SaveChangesAsync();
             return NoContent();
         }
     }

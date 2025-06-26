@@ -4,12 +4,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using FigurasApi.Repositories;
+using FigurasApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuración de EF Core con Postgres
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Registro de repositorios y servicios
+builder.Services.AddScoped<IFiguraRepository, FiguraRepository>();
+builder.Services.AddScoped<IFiguraService, FiguraService>();
 
 // Configuración de autenticación JWT
 builder.Services.AddAuthentication(options =>

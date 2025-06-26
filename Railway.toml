@@ -1,5 +1,0 @@
-[build]
-nixpacksPlan = "dotnet"
-nixpacksVersion = "1.17.0"
-[env]
-DOTNET_SDK_VERSION = "8.0"
