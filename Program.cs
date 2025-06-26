@@ -67,11 +67,8 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // Middleware de Swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
